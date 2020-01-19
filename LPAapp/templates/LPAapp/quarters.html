@@ -1,0 +1,83 @@
+{% extends "LPAapp/base.html" %}
+
+{% block title %}
+<title>项目列表</title>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ current }}</h2>
+    </div>
+    <div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                所有项目
+            </div>
+            <div class="panel-body">
+                <div class="list-op" align="right">
+                    {% if perms.LPAapp.add_quarter %}
+                    <a href="{% url 'LPAapp:new_quarter' %}" class="btn btn-default btn-sm" data-toggle="tooltip" title="增加项目">
+                        <i class="glyphicon glyphicon-plus"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr class="success">
+                        {% if quarters %}
+                        <th>项目名称</th>
+                        <th>是否当前</th>
+                        <th>截止时间</th>
+                        <th>部门数量</th>
+                        <th>货品数量</th>
+                        {% if perms.LPAapp.delete_quarter %}
+                        <th>操作</th>
+                        {% endif %}
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quarter in quarters %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'LPAapp:quarter_stat' quarter.id %}" data-toggle="tooltip" title="项目统计">
+                                {{ quarter }}
+                            </a>
+                        </td>
+                        {% if quarter.current %}
+                        <td>True</td>
+                        {% else %}
+                        <td>
+                            {% if perms.LPAapp.add_quarter %}
+                            <a href="{% url 'LPAapp:setcur_quarter' quarter.id %}" style="font-size:14px">设为当前</a>
+                            {% else %}
+                            {{ quarter.current }}
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <td>{{ quarter.end_time }}</td>
+                        <td>{{ quarter.branch_set.count }}</td>
+                        <td>{{ quarter.commodity_set.count }}</td>
+                        {% if perms.LPAapp.delete_quarter %}
+                        <td>
+                            <a href="{% url 'LPAapp:edit_quarter' quarter.id %}" data-toggle="tooltip" title="编辑项目">
+                                <i class="glyphicon glyphicon-pencil"></i>
+                            </a>
+                            <a href="{% url 'LPAapp:delete_quarter' quarter.id %}" data-toggle="tooltip" title="删除项目">
+                                <i class="glyphicon glyphicon-remove"></i>
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <h3 align="center">There is not any project yet.</h3>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p align="right">共有： {{ quarters.count }} 条记录。</p>
+        </div>
+    </div>
+</div>
+{% endblock content %}

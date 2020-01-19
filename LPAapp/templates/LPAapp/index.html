@@ -1,0 +1,191 @@
+{% extends "LPAapp/base.html" %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+{% block title %}
+<title>货品管理系统</title>
+<script type="text/javascript">
+    function validateEdit(){
+        var str = document.getElementById("end_time").innerHTML;
+        var EndTime= new Date(str); //截止时间
+        var NowTime = new Date();
+        var t =EndTime.getTime() - NowTime.getTime();
+        if (t<=0){
+            alert("非填写时间！");
+            return false;
+        }
+        else{
+            window.location.href = "{% url 'LPAapp:person' %}";
+        }
+    }
+</script>
+<style>
+    .form-horizontal{
+        background: #f5f5f5;
+        padding-bottom: 1px;
+        border-radius: 15px;
+        text-align: center;
+    }
+    .form-horizontal .heading{
+        display: block;
+        font-size: 35px;
+        font-weight: 700;
+        padding: 15px 0;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 30px;
+    }
+    .form-horizontal .form-group{
+        padding: 0 40px;
+        margin: 0 0 25px 0;
+        position: relative;
+    }
+    .form-horizontal .form-control{
+        background: #ffffff;
+        border: none;
+        border-radius: 20px;
+        box-shadow: none;
+        padding: 0 20px 0 45px;
+        height: 40px;
+        transition: all 0.3s ease 0s;
+    }
+    .form-horizontal .form-control:focus{
+        background: #e0e0e0;
+        box-shadow: none;
+        outline: 0 none;
+    }
+    .form-horizontal .form-group i{
+        position: absolute;
+        top: 12px;
+        left: 60px;
+        font-size: 17px;
+        color: #c8c8c8;
+        transition : all 0.5s ease 0s;
+    }
+    .form-horizontal .form-control:focus + i{
+        color: #00b4ef;
+    }
+    .form-horizontal .text{
+        float: left;
+        margin-left: 7px;
+        line-height: 20px;
+        padding-top: 5px;
+        text-transform: capitalize;
+    }
+    .form-horizontal .btn{
+        float: right;
+        font-size: 14px;
+        color: #fff;
+        background: #00b4ef;
+        border-radius: 30px;
+        padding: 10px 25px;
+        border: none;
+        text-transform: capitalize;
+        transition: all 0.5s ease 0s;
+    }
+    @media only screen and (max-width: 479px){
+        .form-horizontal .form-group{
+            padding: 0 25px;
+        }
+        .form-horizontal .form-group i{
+            left: 45px;
+        }
+        .form-horizontal .btn{
+            padding: 10px 20px;
+        }
+    }
+</style>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:100px;margin-bottom:10px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <div class="jumbotron" style="text-align: center;background:url('static/5.jpg');background-size:100% 100%;">
+            <p class="text-warning" style="font-size:40px;font-family:Microsoft YaHei">货品管理系统</p>
+        </div>
+    </div>
+    <div class="col-md-offset-1 col-md-10">
+        {% if user.is_authenticated %}
+            {% if not user.is_staff %}
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        公告
+                    </div>
+                    <div class="panel-body">
+                        {% if quarter %}
+                        <h3>{{ quarter.notice }}</h3>
+                        {% else %}
+                        <h2>暂无公告</h2>
+                        {% endif %}
+                    </div>
+                </div>
+                <span id="end_time" hidden>{{ quarter.end_time }}</span>
+                <h1 align="center">
+                    <a href="{% url 'LPAapp:person' %}" style="text-decoration:none">
+                        >>>>>开始选择>>>>>
+                    </a>
+                </h1>
+                <br>
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        历史记录
+                    </div>
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    {% if user.person_set.all %}
+                                    <th>项目</th>
+                                    <th>部门</th>
+                                    <th>限额</th>
+                                    <th>总价</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in user.person_set.all %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'LPAapp:person_view' p.id %}" data-toggle="tooltip" title="详细信息">
+                                            {{ p.branch.quarter }}
+                                        </a>
+                                    </td>
+                                    <td>{{ p.branch }}</td>
+                                    <td>{{ p.limit }}</td>
+                                    <td>{{ p.value }}</td>
+                                </tr>
+                                {% empty %}
+                                <h3 align="center">There is no record yet.</h3>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+        <div class="container">
+            <div class="row">
+                <div class="col-md-offset-3 col-md-4">
+                    <form class="form-horizontal" action="{% url 'LPAapp:index' %}" method="post">
+                        {% csrf_token %}
+                        <span class="heading">
+                            <img alt="" class="img-circle" src="{% static 'favicon.png' %}" width="64px" height="64px">
+                        </span>
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="username" placeholder="用户名" value="{{username}}" id="u_name">
+                            <i class="glyphicon glyphicon-user"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control" name="password" placeholder="密　码" value="{{password}}" id="u_pwd">
+                            <i class="glyphicon glyphicon-lock"></i>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-default">登录</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

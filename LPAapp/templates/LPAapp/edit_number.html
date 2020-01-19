@@ -1,0 +1,67 @@
+{% extends "LPAapp/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}
+<title>编辑货品</title>
+<script type="text/javascript">
+function validateForm(){
+    var x = Number($("#count").val());
+    var nval = Number($("#nval").html());
+    var more = Number($("#more").html());
+    var limit = Number($("#limit").html());
+    var total = Number($("#total").html());
+    var price = Number($("#price").html());
+    if (price * (x - nval) + total > limit + more){
+        alert("超出限制金额！");
+        return false;
+    }
+}
+</script>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ quarter }}</h2>
+        <h4>{{ person.branch }} - <a href="{% url 'LPAapp:person' %}">{{ person }}</a> - 编辑货品</h4>
+    </div>
+    <div>
+        <div class="panel panel-success col-md-offset-2 col-md-8" style="padding:0">
+            <div class="panel-heading">
+                <h4 class="panel-title">{{ number.commodity.proname }}</h4>
+            </div>
+            <div class="panel-body" align="center">
+                <img src="{{ number.commodity.proimg.url }}" style="width:160px;height:160px">
+                <div class="row my-3 panel-title">
+                    ¥<span id="price">{{ number.commodity.price }}</span>
+                </div>
+                <div>
+                    <span id="more" hidden>{{ more }}</span>
+                    <span id="limit" hidden>{{ person.limit }}</span>
+                    <span id="total" hidden>{{ person.value }}</span>
+                    <span id="nval" hidden>{{ number.value }}</span>
+                </div>
+                <form name="myForm" action="{% url 'LPAapp:edit_number' number.id %}" onsubmit="return validateForm()" method="post">
+                    {% csrf_token %}
+                    <div class="row my-3">
+                        <label for="count" class="col-md-1 control-label">数量</label>
+                        <div class="col-sm-11">
+                            <input name="count" id="count" type="text" class="form-control" value="{{number.value}}">
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <label class="col-md-1 control-label">备注</label>
+                        <div class="col-sm-11">
+                            <textarea name="remark" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    {% buttons %}
+                    <p align="center"><button name="submit" class="btn btn-primary">保存修改</button></p>
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

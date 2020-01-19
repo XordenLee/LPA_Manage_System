@@ -1,0 +1,80 @@
+{% extends "LPAapp/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}
+<title>填写控制</title>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ quarter }}</h2>
+        <h4>填写控制</h4>
+    </div>
+    <div>
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h2 class="panel-title">用户填写状态</h2>
+            </div>
+            <div class="panel-body" align="center">
+                <h1 align="center" id="clock">关闭</h1>
+                <script type="text/javascript">
+                function getRTime(){
+                    var str = document.getElementById("end_time").innerHTML;
+                    var EndTime= new Date(str); //截止时间
+                    var NowTime = new Date();
+                    var t = EndTime.getTime() - NowTime.getTime();
+                    if (t<=0){
+                        clearInterval(timer);
+                        document.getElementById("clock").innerHTML = "关闭";
+                        return;
+                    }
+                    var d=Math.floor(t/1000/60/60/24);
+                    var h=Math.floor(t/1000/60/60%24);
+                    var m=Math.floor(t/1000/60%60);
+                    var s=Math.floor(t/1000%60);
+                    document.getElementById("clock").innerHTML = "倒计时：" + d + "天" + h + "时" + m + "分" + s + "秒";
+                }
+                timer = setInterval(getRTime,1000);
+                </script>
+                <h2 id="end_time" hidden>{{ quarter.end_time }}</h2>
+            </div>
+        </div>
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h2 class="panel-title">定时控制</h2>
+            </div>
+            <div class="panel-body" align="center">
+                <form method="post" action="{% url 'LPAapp:log_control' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-2">
+                            <span style="font-weight:bold">截止时间：</span>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="year" placeholder="年" value="2019">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="month" placeholder="月">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="day" placeholder="日">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="hour" placeholder="小时">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="minute" placeholder="分钟">
+                        </div>
+                    </div>
+                    <br>
+                    {% buttons %}
+                        <button name="submit" class="btn btn-primary">确认修改</button>
+                        <a href="{% url 'LPAapp:log_end' %}" style="margin-left:100px" class="btn btn-primary">停止填写</a>
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

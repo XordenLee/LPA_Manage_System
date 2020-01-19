@@ -1,0 +1,190 @@
+{% extends "LPAapp/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}
+<title>{{ person }}</title>
+<script type="text/javascript">
+function validateForm(val){
+    var x = Number(document.forms["myForm"]["count"].value);
+    var more = Number(document.getElementById("more").innerHTML);
+    var limit = Number($("#limit").html());
+    var total = Number($("#total").html());
+    var value = Number(val);
+    if (value * x + more > limit - total){
+        alert("超出限制金额！");
+        return false;
+    }
+}
+function getRTime(){
+    var str = document.getElementById("end_time").innerHTML;
+    var EndTime= new Date(str); //截止时间
+    var NowTime = new Date();
+    var t =EndTime.getTime() - NowTime.getTime();
+    if (t<=0){
+        clearInterval(timer);
+        window.location.href = "{% url 'LPAapp:index' %}";
+        return;
+    }
+    var d=Math.floor(t/1000/60/60/24);
+    var h=Math.floor(t/1000/60/60%24);
+    var m=Math.floor(t/1000/60%60);
+    var s=Math.floor(t/1000%60);
+    document.getElementById("clock").innerHTML = "倒计时：" + d + "天" + h + "时" + m + "分" + s + "秒";
+}
+timer = setInterval(getRTime,1000);
+</script>
+{% endblock title %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ quarter }}</h2>
+        <h4>
+            {{ person.branch.text }} - {{ person }}
+            <span style="float:right">剩余金额：{{ rest }}</span>
+            <span style="float:right"><font color="red">限额：<span id="limit">{{ person.limit }}</span></font>&nbsp;&nbsp;</span>
+            <span style="float:right"><font color="green" id="clock"></font>&nbsp;&nbsp;</span>
+            <span style="float:right" id="end_time" hidden>{{ quarter.end_time }}</span>
+            <span style="float:right" id="more" hidden>{{ more }}</span>
+        </h4>
+    </div>
+    <div>
+        <div class="panel panel-info col-md-3" style="padding:0">
+            <div class="panel-heading">
+                已选货品
+                <span class="col-sm-offset-4">¥
+                    <span id="total">{{ person.value }}</span>
+                </span>
+                <span style="float:right">
+                    <a href="{% url 'LPAapp:clear_numbers' person.id %}" data-toggle="tooltip" title="清空所选">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </a>
+                </span>
+            </div>
+            <div class="panel-body">
+                <table class="table table-condensed">
+                    <thead>
+                      <tr>
+                          {% if numbers %}
+                          <th>编号</th>
+                          <th>名称</th>
+                          <th>单价</th>
+                          <th>数量</th>
+                          <th>操作</th>
+                          {% endif %}
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {% for t in numbers %}
+                        <tr>
+                          <td>{{ t.commodity.proid }}</td>
+                          <td>{{ t.commodity.proname }}</td>
+                          <td>{{ t.commodity.price }}</td>
+                          <td>{{ t.value }}</td>
+                          <td>
+                              {% if perms.LPAapp.change_number %}
+                              <a href="{% url 'LPAapp:edit_number' t.id %}" data-toggle="tooltip" title="编辑数量">
+                                  <i class="glyphicon glyphicon-pencil"></i>
+                              </a>
+                              {% endif %}
+                              {% if perms.LPAapp.delete_number %}
+                              <a href="{% url 'LPAapp:delete_number' t.id %}" data-toggle="tooltip" title="删除此项">
+                                  <i class="glyphicon glyphicon-remove"></i>
+                              </a>
+                              {% endif %}
+                          </td>
+                        </tr>
+                    {% empty %}
+                        <h4 align="center">There is no commodity been added.</h4>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="container col-md-9">
+            <div class="panel panel-success" style="padding:0">
+                <div class="panel-heading">
+                    <h3 class="panel-title">可选列表</h3>
+                </div>
+                <div class="panel-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            {% if commodities %}
+                            <th>编号</th>
+                            <th>名称</th>
+                            <th>图片</th>
+                            <th>单价</th>
+                            <th>操作</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for t in commodities %}
+                        <tr>
+                          <td>{{ t.proid }}</td>
+                          <td>{{ t.proname }}</td>
+                          <td><a class="avatar"><img src="{{ t.proimg.url }}"></a></td>
+                          <td>{{ t.price }}</td>
+                          <td>
+                              <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#{{t.id}}">选择</button>
+                              <div class="modal fade" id="{{t.id}}" style="padding-top:100px;display:none">
+                                  <div class="modal-dialog">
+                                      <div class="modal-content">
+                                          <form name="myForm" action="{% url 'LPAapp:person' %}" onsubmit="return validateForm({{t.price}})"
+                                                method="post" class="form-horizontal">
+                                              {% csrf_token %}
+
+                                              <div class="modal-header">
+                                                  <h4 class="modal-title">{{ t.proname }}</h4>
+                                                  <button type="button" class="close" data-dismiss="modal" style="float:right">
+                                                      <span aria-hidden="true">×</span>
+                                                      <span class="sr-only">Close</span>
+                                                  </button>
+                                              </div>
+
+                                              <div class="modal-body">
+                                                  <p align="center">
+                                                      <img src="{{ t.proimg.url }}" style="width:360px;height:360px"><br><br>
+                                                  </p>
+                                                  <h4 align="center">¥{{ t.price }}</h4>
+                                                  <input name="proid" value="{{ t.proid }}" hidden>
+                                                  <div class="form-group">
+                                                      <label class="col-sm-2 control-label">数量</label>
+                                                      <div class="col-sm-10">
+                                                          <input name="count" type="text" class="form-control" value="1">
+                                                      </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                      <label class="col-sm-2 control-label">备注</label>
+                                                      <div class="col-sm-10">
+                                                          <textarea name="remark" class="form-control" rows="3"></textarea>
+                                                      </div>
+                                                  </div>
+                                              </div>
+
+                                              <div class="modal-footer">
+                                                  <button name="submit" class="btn btn-primary">
+                                                      添加
+                                                  </button>
+                                              </div>
+                                              <script>
+
+                                              </script>
+                                          </form>
+                                      </div>
+                                  </div>
+                              </div>
+                          </td>
+                        </tr>
+                      {% empty %}
+                        <h4 align="center">There is not any commodity yet.</h4>
+                      {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

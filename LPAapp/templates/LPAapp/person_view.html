@@ -1,0 +1,72 @@
+{% extends "LPAapp/base.html" %}
+
+{% block title %}
+<title>{{ person }}</title>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ quarter }}</h2>
+        <h4>
+            {% if perms.LPAapp.view_person %}
+            <a href="{% url 'LPAapp:persons' %}">所有人员</a>&nbsp;-&nbsp;
+            {% else %}
+            <a href="{% url 'LPAapp:index' %}">首页</a>&nbsp;-&nbsp;
+            {% endif %}
+            {{ person }}
+            <span style="float:right">总计：{{ person.value }}</span>
+        </h4>
+    </div>
+    <div>
+        <div class="panel panel-success">
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                      {% if numbers %}
+                      <th>货品编号</th>
+                      <th>货品名称</th>
+                      {% if perms.LPAapp.view_commodity %}
+                      <th>添加时间</th>
+                      {% endif %}
+                      {% if perms.LPAapp.add_number %}
+                      <th>货品图片</th>
+                      {% endif %}
+                      <th>货品单价</th>
+                      <th>货品数量</th>
+                      {% if perms.LPAapp.view_person %}
+                      <th>操作</th>
+                      {% endif %}
+                      {% endif %}
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for t in numbers %}
+                    <tr>
+                        <td>{{ t.commodity.proid }}</td>
+                        <td>{{ t.commodity.proname }}</td>
+                        {% if perms.LPAapp.view_commodity %}
+                        <td>{{ t.date_added|date:'Y-n-d H:i' }}</td>
+                        {% endif %}
+                        {% if perms.LPAapp.add_number %}
+                        <td><a class="avatar"><img src="{{ t.commodity.proimg.url }}"></a></td>
+                        {% endif %}
+                        <td>{{ t.commodity.price }}</td>
+                        <td>{{ t.value }}</td>
+                        {% if perms.LPAapp.view_person %}
+                        <td>
+                            <a href="{% url 'LPAapp:delete_number' t.id %}" data-toggle="tooltip" title="删除此项">
+                                <i class="glyphicon glyphicon-remove"></i>
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <h3 align="center">There is no commodity been added.</h3>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %}

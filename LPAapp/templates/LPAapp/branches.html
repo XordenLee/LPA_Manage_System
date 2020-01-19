@@ -1,0 +1,113 @@
+{% extends "LPAapp/base.html" %}
+
+{% block title %}
+<title>所有部门</title>
+<script>
+$(function(){
+    function initTableCheckbox() {
+        var $thr = $('table thead tr');
+        var $checkAllTh = $('th[input]');
+        var $checkAll = $thr.find('input');
+        $checkAll.click(function(event){
+            $tbr.find('input').prop('checked',$(this).prop('checked'));
+            if ($(this).prop('checked')) {
+                $tbr.find('input').parent().parent().addClass('warning');
+            } else{
+                $tbr.find('input').parent().parent().removeClass('warning');
+            }
+            event.stopPropagation();
+        });
+        $checkAllTh.click(function(){
+            $(this).find('input').click();
+        });
+        var $tbr = $('table tbody tr');
+        var $checkItemTd = $('td[input]');
+        $tbr.find('input').click(function(event){
+            $(this).parent().parent().toggleClass('warning');
+            $checkAll.prop('checked',$tbr.find('input:checked').length == $tbr.length ? true : false);
+            event.stopPropagation();
+        });
+        $tbr.click(function(){
+            $(this).find('input').click();
+        });
+    }
+    initTableCheckbox();
+});
+</script>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ quarter }}</h2>
+    </div>
+    <div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                所有部门
+            </div>
+            <form action="{% url 'LPAapp:branches' %}" method="post">
+                {% csrf_token %}
+                <div class="panel-body">
+                    <div class="list-op" align="right">
+                        {% if branches %}
+                        <input type="submit" class="btn btn-info btn-sm" value="多部门统计" />
+                        {% endif %}
+                        {% if perms.LPAapp.add_branch %}
+                        <a href="{% url 'LPAapp:new_branch' %}" class="btn btn-default btn-sm" data-toggle="tooltip" title="增加部门">
+                            <i class="glyphicon glyphicon-plus"></i>
+                        </a>
+                        {% endif %}
+                        {% if perms.LPAapp.delete_branch %}
+                        <a href="{% url 'LPAapp:clear_branches' %}" class="btn btn-default btn-sm" data-toggle="tooltip" title="清空部门">
+                            <i class="glyphicon glyphicon-trash"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="success">
+                            {% if branches %}
+                            <th>
+                                <input type="checkbox" id="checkAll" name="checkAll" />
+                            </th>
+                            <th>部门名称</th>
+                            <th>部门人数</th>
+                            <th>操作</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for branch in branches %}
+                        <tr>
+                            <td><input type="checkbox" value="{{ branch.id }}" name="checkItem" /></td>
+                            <td><a href="{% url 'LPAapp:branch_stat' branch.id %}" data-toggle="tooltip" title="部门统计">{{ branch }}</a></td>
+                            <td>{{ branch.person_set.count }}</td>
+                            <td>
+                                <a href="{% url 'LPAapp:list_download' branch.id %}" data-toggle="tooltip" title="个人清单">
+                                    <i class="glyphicon glyphicon-download"></i>
+                                </a>
+                                {% if perms.LPAapp.change_branch %}
+                                <a href="{% url 'LPAapp:edit_branch' branch.id %}" data-toggle="tooltip" title="编辑部门" style="font-size:14px">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </a>
+                                {% endif %}
+                                {% if perms.LPAapp.delete_branch %}
+                                <a href="{% url 'LPAapp:delete_branch' branch.id %}" data-toggle="tooltip" title="删除部门" style="font-size:14px">
+                                    <i class="glyphicon glyphicon-remove"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <h3 align="center">There is not any branch yet.</h3>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+            <p align="right">共有： {{ branches.count }} 条记录。</p>
+        </div>
+    </div>
+</div>
+{% endblock content %}

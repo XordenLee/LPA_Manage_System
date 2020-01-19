@@ -1,0 +1,64 @@
+{% extends "LPAapp/base.html" %}
+
+{% block title %}
+<title>项目统计</title>
+<script>
+$(function(){
+    function initTableCheckbox() {
+        var $tbr = $('table tbody tr');
+        $tbr.click(function(event){
+            $(this).toggleClass('warning');
+            event.stopPropagation();
+        });
+    }
+    initTableCheckbox();
+});
+</script>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ current }}</h2>
+        <h4>
+            <span><a href="{% url 'LPAapp:quarters' %}">项目列表</a> - {{ quarter }}</span>
+            <span style="float:right">
+                <a href="{% url 'LPAapp:quarter_download' quarter.id %}">
+                    <i class="glyphicon glyphicon-download-alt"></i>
+                </a>
+            </span>
+        </h4>
+    </div>
+    <div>
+        <div class="panel panel-success">
+            <table class="table table-responsive table-bordered">
+                <thead>
+                  {% if lis %}
+                  <tr>
+                      <th>货品名称</th>
+                      {% for branch in branches %}
+                      <th>{{ branch.text }}</th>
+                      {% endfor %}
+                      <th>个数合计</th>
+                      <th>金额合计</th>
+                  </tr>
+                  {% endif %}
+                </thead>
+                <tbody>
+                  {% for l in lis %}
+                    <tr>
+                      {% for li in l %}
+                      <td>{{ li }}</td>
+                      {% endfor %}
+                    </tr>
+                  {% empty %}
+                    <li>
+                      There is no commodity been added.
+                    </li>
+                  {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %}

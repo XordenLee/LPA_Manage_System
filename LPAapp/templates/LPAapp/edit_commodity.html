@@ -1,0 +1,25 @@
+{% extends "LPAapp/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}
+<title>编辑货品</title>
+{% endblock title %}
+
+{% block content %}
+<div class="container" style="margin-top:80px;margin-bottom:40px;">
+    <div class="page-header" style="margin-bottom:20px">
+        <h2 align="center">{{ quarter }}</h2>
+        <h4><a href="{% url 'LPAapp:commodities' %}">所有货品</a> - 编辑货品</h4>
+    </div>
+    <div>
+        <form action="{% url 'LPAapp:edit_commodity' commodity.id %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+
+            {% buttons %}
+              <button name="submit" class="btn btn-primary">保存修改</button>
+            {% endbuttons %}
+        </form>
+    </div>
+</div>
+{% endblock content %}
